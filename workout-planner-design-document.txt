@@ -78,33 +78,153 @@ The architecture follows the MVC (Model-View-Controller) pattern and consists of
 
 - **User**:
   ```json
+  [
   {
     "id": "string",
-    "name": "string",
+    "username": "string",
+    "firstName": "string",
+    "lastName": "string",
+    "phone": "string",
+    "gender": "MALE",
+    "age": 0,
     "email": "string",
-    "password": "string"
+    "weight": 0,
+    "height": 0,
+    "goal": "string",
+    "profilePicture": {
+      "binaryStream": {}
+    },
+    "workouts": [
+      {
+        "id": "string",
+        "name": "string",
+        "description": "string",
+        "duration": 0,
+        "timeOfDay": "MORNING",
+        "exercises": [
+          {
+            "id": "string",
+            "name": "string",
+            "description": "string",
+            "muscleGroup": "string",
+            "equipment": "string",
+            "videoUrl": "string",
+            "sets": 0,
+            "reps": 0,
+            "restTime": {
+              "seconds": 0,
+              "nano": 0,
+              "negative": true,
+              "zero": true,
+              "units": [
+                {
+                  "dateBased": true,
+                  "timeBased": true,
+                  "durationEstimated": true
+                }
+              ]
+            }
+          }
+        ],
+        "createdAt": "2024-09-09T18:22:58.792Z",
+        "updatedAt": "2024-09-09T18:22:58.792Z"
+      }
+    ],
+    "exercises": [
+      {
+        "id": "string",
+        "name": "string",
+        "description": "string",
+        "muscleGroup": "string",
+        "equipment": "string",
+        "videoUrl": "string",
+        "sets": 0,
+        "reps": 0,
+        "restTime": {
+          "seconds": 0,
+          "nano": 0,
+          "negative": true,
+          "zero": true,
+          "units": [
+            {
+              "dateBased": true,
+              "timeBased": true,
+              "durationEstimated": true
+            }
+          ]
+        }
+      }
+    ],
+    "createdAt": "2024-09-09T18:22:58.792Z",
+    "updatedAt": "2024-09-09T18:22:58.792Z"
   }
+]
   ```
 
 - **WorkoutPlan**:
   ```json
   {
-    "id": "string",
-    "userId": "string",  // User reference
-    "name": "string",
-    "description": "string",
-    "exercises": [
-      {
+        "id": "string",
         "name": "string",
-        "sets": "int",
-        "reps": "int",
-        "duration": "int"  // in minutes
+        "description": "string",
+        "duration": 0,
+        "timeOfDay": "MORNING",
+        "exercises": [
+          {
+            "id": "string",
+            "name": "string",
+            "description": "string",
+            "muscleGroup": "string",
+            "equipment": "string",
+            "videoUrl": "string",
+            "sets": 0,
+            "reps": 0,
+            "restTime": {
+              "seconds": 0,
+              "nano": 0,
+              "negative": true,
+              "zero": true,
+              "units": [
+                {
+                  "dateBased": true,
+                  "timeBased": true,
+                  "durationEstimated": true
+                }
+              ]
+            }
+          }
+        ],
+        "createdAt": "2024-09-09T18:22:58.792Z",
+        "updatedAt": "2024-09-09T18:22:58.792Z"
       }
-    ]
-  }
   ```
 
 - **Exercise**:
+```json
+  {
+        "id": "string",
+        "name": "string",
+        "description": "string",
+        "muscleGroup": "string",
+        "equipment": "string",
+        "videoUrl": "string",
+        "sets": 0,
+        "reps": 0,
+        "restTime": {
+          "seconds": 0,
+          "nano": 0,
+          "negative": true,
+          "zero": true,
+          "units": [
+            {
+              "dateBased": true,
+              "timeBased": true,
+              "durationEstimated": true
+            }
+          ]
+        }
+      }
+  ```
   This is embedded in the `WorkoutPlan` as shown above.
 
 - **Progress**:
@@ -117,10 +237,27 @@ The architecture follows the MVC (Model-View-Controller) pattern and consists of
     "caloriesBurned": "int",
     "exercisesCompleted": [
       {
-        "exerciseId": "string",
-        "sets": "int",
-        "reps": "int",
-        "duration": "int"
+        "id": "string",
+        "name": "string",
+        "description": "string",
+        "muscleGroup": "string",
+        "equipment": "string",
+        "videoUrl": "string",
+        "sets": 0,
+        "reps": 0,
+        "restTime": {
+          "seconds": 0,
+          "nano": 0,
+          "negative": true,
+          "zero": true,
+          "units": [
+            {
+              "dateBased": true,
+              "timeBased": true,
+              "durationEstimated": true
+            }
+          ]
+        }
       }
     ]
   }
