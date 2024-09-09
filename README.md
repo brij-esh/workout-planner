@@ -197,12 +197,13 @@ The architecture follows the MVC (Model-View-Controller) pattern and consists of
         ],
         "createdAt": "2024-09-09T18:22:58.792Z",
         "updatedAt": "2024-09-09T18:22:58.792Z"
-      }
+    }
   ```
-
+  
+  
 - **Exercise**:
-```json
-  {
+  ```json
+   {
         "id": "string",
         "name": "string",
         "description": "string",
@@ -224,7 +225,7 @@ The architecture follows the MVC (Model-View-Controller) pattern and consists of
             }
           ]
         }
-      }
+    }
   ```
 
 - **Progress**:
