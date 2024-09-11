@@ -1,21 +1,13 @@
 package com.workout.planner.models;
 
-import jakarta.persistence.Id;
-
-import com.workout.planner.enums.Gender;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.workout.planner.enums.Gender;
 
 @Data
 @AllArgsConstructor
@@ -25,23 +17,36 @@ import java.util.List;
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
     private String username;
     private String password;
     private String firstName;
     private String lastName;
-    private Gender gender;
     private int age;
+    private Gender gender;
     private String phone;
     private String email;
     private Double weight;
     private Double height;
     private String goal;
     private Blob profilePicture;
-    @OneToMany(targetEntity = Workout.class, mappedBy = "user", fetch = FetchType.EAGER)
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "user_workouts",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "workout_id")
+    )
     private List<Workout> workouts;
-    @OneToMany(targetEntity = Exercise.class, mappedBy = "user", fetch = FetchType.EAGER)
-    private List<Exercise> exercises;
+
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    private List<Workout> createdWorkouts;
+
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    private List<Exercise> createdExercises;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

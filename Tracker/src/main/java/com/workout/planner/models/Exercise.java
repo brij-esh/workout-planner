@@ -1,22 +1,22 @@
 package com.workout.planner.models;
 
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.Duration;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.Data;
-
+import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "exercises")
 public class Exercise {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
     private String name;
     private String description;
     private String muscleGroup;
@@ -24,12 +24,16 @@ public class Exercise {
     private String videoUrl;
     private int sets;
     private int reps;
-    private Duration restTime;
-    @ManyToOne(targetEntity = User.class)
-    @JsonIgnore
-    private User user;
-    @ManyToOne(targetEntity = Workout.class)
-    @JsonIgnore
-    private Workout workout;
+    private Long restTime; // stored in minutes
 
+    @ManyToOne
+    @JoinColumn(name = "creator_id", referencedColumnName = "id", nullable = false)
+    private User creator; // Exercise creator
+
+    @ManyToMany(mappedBy = "exercises", fetch = FetchType.LAZY)
+    private List<Workout> workouts;
+
+    public Duration getRestTime() {
+        return Duration.ofMinutes(restTime);
+    }
 }

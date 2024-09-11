@@ -1,21 +1,13 @@
 package com.workout.planner.models;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.workout.planner.enums.TimeOfDay;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
@@ -25,16 +17,33 @@ import lombok.NoArgsConstructor;
 @Table(name = "workouts")
 public class Workout {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @ManyToOne(targetEntity = User.class)
-    @JsonIgnore
-    private User user;
+
     private String name;
     private String description;
-    private Long duration;
+    private Long duration; // stored in minutes
     private TimeOfDay timeOfDay;
-    @OneToMany(targetEntity = Exercise.class, fetch = FetchType.EAGER)
+
+    @ManyToMany(mappedBy = "workouts", fetch = FetchType.LAZY)
+    private List<User> participants; // Users participating in the workout
+
+    @ManyToOne
+    @JoinColumn(name = "creator_id", referencedColumnName = "id", nullable = false)
+    private User creator; // Workout creator
+
+    @ManyToMany
+    @JoinTable(
+        name = "workout_exercises",
+        joinColumns = @JoinColumn(name = "workout_id"),
+        inverseJoinColumns = @JoinColumn(name = "exercise_id")
+    )
     private List<Exercise> exercises;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public Duration getDuration() {
+        return Duration.ofMinutes(duration);
+    }
 }
