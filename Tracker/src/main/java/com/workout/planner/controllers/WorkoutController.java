@@ -39,21 +39,21 @@ public class WorkoutController {
         return new ResponseEntity<>(workoutService.getWorkout(id), HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<Workout> createWorkout(@RequestBody WorkoutRequestDTO workout) {
-        Workout createdWorkout = workoutService.createWorkout(workout);
+    @PostMapping("/{userEmail}")
+    public ResponseEntity<Workout> createWorkout(@PathVariable String userEmail, @RequestBody WorkoutRequestDTO workout) {
+        Workout createdWorkout = workoutService.createWorkout(userEmail, workout);
         return new ResponseEntity<>(createdWorkout, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Workout> updateWorkout(@PathVariable String id, @RequestBody WorkoutRequestDTO workout) {
-        Workout updatedWorkout = workoutService.updateWorkout(id, workout);
+    @PutMapping("/{userEmail}/{workoutId}")
+    public ResponseEntity<Workout> updateWorkout(@PathVariable String userEmail, @PathVariable String workoutId, @RequestBody WorkoutRequestDTO workout) {
+        Workout updatedWorkout = workoutService.updateWorkout(userEmail, workoutId, workout);
         return new ResponseEntity<>(updatedWorkout, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWorkout(@PathVariable String id) {
-        workoutService.deleteWorkout(id);
+    @DeleteMapping("/{userEmail}/{workoutId}")
+    public ResponseEntity<Void> deleteWorkout(@PathVariable String userEmail, @PathVariable String workoutId) {
+        workoutService.deleteWorkout(userEmail, workoutId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -63,9 +63,9 @@ public class WorkoutController {
         return new ResponseEntity<>(exercises, HttpStatus.OK);
     }
 
-    @PostMapping("/{id}/exercises")
-    public ResponseEntity<Exercise> addExercise(@PathVariable String id, @RequestBody Exercise exercise) {
-        Exercise addedExercise = workoutService.addExercise(id, exercise);
+    @PostMapping("/{workoutId}/exercises/{exerciseId}")
+    public ResponseEntity<Exercise> addExercise(@PathVariable String workoutId, @PathVariable String exerciseId) {
+        Exercise addedExercise = workoutService.addExercise(workoutId, exerciseId);
         return new ResponseEntity<>(addedExercise, HttpStatus.CREATED);
     }
 

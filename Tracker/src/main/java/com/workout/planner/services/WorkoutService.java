@@ -7,14 +7,14 @@ import com.workout.planner.models.Exercise;
 import com.workout.planner.models.Workout;
 
 public interface WorkoutService {
-    public Workout createWorkout(WorkoutRequestDTO workoutRequestDTO);
+    public Workout createWorkout(String userEmail, WorkoutRequestDTO workoutRequestDTO);
     public List<Workout> getWorkouts();
-    public Workout getWorkout(String id);
-    public Workout updateWorkout(String id, WorkoutRequestDTO workoutRequestDTO);
-    public void deleteWorkout(String id);
-    public List<Exercise> getExercises(String id);
-    public Exercise addExercise(String id, Exercise exercise);
-    public Exercise getExercise(String id, String exerciseId);
-    public Exercise updateExercise(String id, String exerciseId, Exercise exercise);
-    public void deleteExercise(String id, String exerciseId);
+    public Workout getWorkout(String workoutId);
+    public Workout updateWorkout(String userEmail, String workoutId, WorkoutRequestDTO workoutRequestDTO);
+    public void deleteWorkout(String userEmail, String workoutId);
+    public List<Exercise> getExercises(String workoutId);
+    public Exercise addExercise(String workoutId, String exerciseId);
+    public Exercise getExercise(String workoutId, String exerciseId);
+    public Exercise updateExercise(String workoutId, String exerciseId, Exercise exercise);
+    public void deleteExercise(String workoutId, String exerciseId);
 }

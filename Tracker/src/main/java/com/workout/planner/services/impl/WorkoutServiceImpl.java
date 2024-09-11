@@ -2,15 +2,21 @@ package com.workout.planner.services.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import com.workout.planner.dtos.WorkoutRequestDTO;
 import com.workout.planner.exception.ExerciseNotFoundException;
+import com.workout.planner.exception.RequestProcessingException;
+import com.workout.planner.exception.UserNotFoundException;
 import com.workout.planner.exception.WorkoutAlreadyExistException;
 import com.workout.planner.exception.WorkoutNotFoundException;
 import com.workout.planner.models.Exercise;
+import com.workout.planner.models.User;
 import com.workout.planner.models.Workout;
+import com.workout.planner.repositories.ExerciseRepository;
+import com.workout.planner.repositories.UserRepository;
 import com.workout.planner.repositories.WorkoutRepository;
 import com.workout.planner.services.WorkoutService;
 
@@ -23,21 +29,31 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkoutServiceImpl implements WorkoutService{
 
     private final ModelMapper modelMapper;
-    
 
     private final WorkoutRepository workoutRepository;
+
+    private final UserRepository userRepository;
+
+    private final ExerciseRepository exerciseRepository;
 
     private static final String WORKOUT_NOT_FOUND_ERROR = "Workout not found with id: ";
     private static final String EXERCISE_NOT_FOUND_ERROR = "Exercise not found with id: ";
     
     @Override
-    public Workout createWorkout(WorkoutRequestDTO workoutRequestDTO) {
+    public Workout createWorkout(String userEmail, WorkoutRequestDTO workoutRequestDTO) {
+        Optional<User> user = userRepository.findByEmail(userEmail);
+        if(!user.isPresent()) {
+            log.error("User not found with email: {}", userEmail);
+            throw new UserNotFoundException("User not found with email: " + userEmail);
+        }
+
         if(workoutRepository.findByName(workoutRequestDTO.getName())!=null) {
             log.error("Workout with name {} already exists", workoutRequestDTO.getName());
             throw new WorkoutAlreadyExistException("Workout with name " + workoutRequestDTO.getName() + " already exists");
         }
         log.info("Creating workout with name: {}", workoutRequestDTO.getName());
         Workout workout = modelMapper.map(workoutRequestDTO, Workout.class);
+        workout.setCreator(user.get());
         workout.setCreatedAt(LocalDateTime.now());
         workout.setUpdatedAt(LocalDateTime.now());
         return workoutRepository.save(workout);
@@ -62,10 +78,20 @@ public class WorkoutServiceImpl implements WorkoutService{
     }
 
     @Override
-    public Workout updateWorkout(String id, WorkoutRequestDTO workoutRequestDTO) {
+    public Workout updateWorkout(String userEmail, String id, WorkoutRequestDTO workoutRequestDTO) {
+        Optional<User> user = userRepository.findByEmail(userEmail);
+        if(!user.isPresent()) {
+            log.error("User not found with email: {}", userEmail);
+            throw new UserNotFoundException("User not found with email: " + userEmail);
+        }
         log.info("Updating workout with id: {}", id);
         Workout existingWorkout = workoutRepository.findById(id)
                 .orElseThrow(() -> new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + id));
+        if(!existingWorkout.getCreator().getEmail().equals(userEmail)) {
+            log.error("User with email {} is not authorized to update workout with id: {}", userEmail, id);
+            throw new RequestProcessingException("User with email " + userEmail + " is not authorized to update workout with id: " + id);
+        }
+
         if(workoutRequestDTO.getName() != null) {
             existingWorkout.setName(workoutRequestDTO.getName());
         }
@@ -83,10 +109,19 @@ public class WorkoutServiceImpl implements WorkoutService{
     }
 
     @Override
-    public void deleteWorkout(String id) {
+    public void deleteWorkout(String userEmail, String id) {
+        Optional<User> user = userRepository.findByEmail(userEmail);
+        if(!user.isPresent()) {
+            log.error("User not found with email: {}", userEmail);
+            throw new UserNotFoundException("User not found with email: " + userEmail);
+        }
         log.info("Deleting workout with id: {}", id);
         Workout existingWorkout = workoutRepository.findById(id)
                 .orElseThrow(() -> new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + id));
+        if(!existingWorkout.getCreator().getEmail().equals(userEmail)) {
+            log.error("User with email {} is not authorized to delete workout with id: {}", userEmail, id);
+            throw new RequestProcessingException("User with email " + userEmail + " is not authorized to delete workout with id: " + id);
+        }
         workoutRepository.delete(existingWorkout);
     }
 
@@ -102,11 +137,20 @@ public class WorkoutServiceImpl implements WorkoutService{
     }
 
     @Override
-    public Exercise addExercise(String id, Exercise exercise) {
+    public Exercise addExercise(String id, String exerciseId) {
         if(!workoutRepository.existsById(id)) {
             log.error("{}{}", WORKOUT_NOT_FOUND_ERROR, id);
             throw new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + id);
         }
+        if(!exerciseRepository.existsById(exerciseId)) {
+            log.error("Exercise not found with id: {}", exerciseId);
+            throw new ExerciseNotFoundException(EXERCISE_NOT_FOUND_ERROR + exerciseId);
+        }
+
+        Exercise exercise = exerciseRepository.findById(exerciseId).get();
+        exercise.getWorkouts().add(workoutRepository.findById(id).get());
+        exerciseRepository.save(exercise);
+        
         log.info("Adding exercise to workout with id: {}", id);
         Workout workout = workoutRepository.findById(id).get();
         workout.getExercises().add(exercise);
