@@ -7,6 +7,8 @@ import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringExclude;
+
 import com.workout.planner.enums.Gender;
 
 @Data
@@ -39,12 +41,13 @@ public class User {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "workout_id")
     )
+    @ToStringExclude
     private List<Workout> workouts;
 
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "creator", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Workout> createdWorkouts;
 
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "creator", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Exercise> createdExercises;
 
     private LocalDateTime createdAt;

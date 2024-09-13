@@ -7,6 +7,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringExclude;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.workout.planner.enums.TimeOfDay;
 
 @Data
@@ -26,10 +30,14 @@ public class Workout {
     private TimeOfDay timeOfDay;
 
     @ManyToMany(mappedBy = "workouts", fetch = FetchType.LAZY)
+    @JsonIgnore
+    @ToStringExclude
     private List<User> participants; // Users participating in the workout
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", referencedColumnName = "id", nullable = false)
+    @JsonIgnore
+    @ToStringExclude
     private User creator; // Workout creator
 
     @ManyToMany
@@ -45,5 +53,10 @@ public class Workout {
 
     public Duration getDuration() {
         return Duration.ofMinutes(duration);
+    }
+
+    @JsonInclude
+    public String getCreatorName() {
+        return creator.getFirstName()+" "+creator.getLastName();
     }
 }

@@ -15,6 +15,7 @@ import com.workout.planner.dtos.UserResponseDTO;
 import com.workout.planner.exception.UserAlreadyExistsException;
 import com.workout.planner.exception.UserNotFoundException;
 import com.workout.planner.models.User;
+import com.workout.planner.models.Workout;
 import com.workout.planner.repositories.UserRepository;
 import com.workout.planner.services.UserService;
 import com.workout.planner.utils.MapperUtils;
@@ -102,6 +103,9 @@ public class UserServiceImpl implements UserService{
         if (userDetails.getPassword() != null) {
             existingUser.setPassword(userDetails.getPassword());
         }
+        if(userDetails.getAge() != 0){
+            existingUser.setAge(userDetails.getAge());
+        }
         if(userDetails.getPhone() != null){
             existingUser.setPhone(userDetails.getPhone());
         }
@@ -135,6 +139,9 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserResponseDTO getUserByUsername(String username) {
         log.info("Fetching user with username: {}", username);
+        User user1 = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+        log.info("User: {}",user1.getCreatedWorkouts().size());
         return userRepository.findByUsername(username)
                         .map(user -> modelMapper.map(user, UserResponseDTO.class))
                         .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));

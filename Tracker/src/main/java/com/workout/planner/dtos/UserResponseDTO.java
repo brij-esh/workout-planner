@@ -30,7 +30,8 @@ public class UserResponseDTO {
     private String goal;
     private Blob profilePicture;
     private List<Workout> workouts;
-    private List<Exercise> exercises;
+    private List<Exercise> createdExercises;
+    private List<Workout> createdWorkouts;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
