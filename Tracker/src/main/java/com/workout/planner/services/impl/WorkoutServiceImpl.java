@@ -115,7 +115,7 @@ public class WorkoutServiceImpl implements WorkoutService {
         if (workoutRequestDTO.getDescription() != null) {
             existingWorkout.setDescription(workoutRequestDTO.getDescription());
         }
-        if (workoutRequestDTO.getDuration() != 0) {
+        if (workoutRequestDTO.getDuration()!=null && workoutRequestDTO.getDuration() != 0) {
             existingWorkout.setDuration(workoutRequestDTO.getDuration());
         }
         if (workoutRequestDTO.getTimeOfDay() != null) {
@@ -155,26 +155,40 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public Exercise addExercise(String id, String exerciseId) {
-        if (!workoutRepository.existsById(id)) {
-            log.error("{}{}", WORKOUT_NOT_FOUND_ERROR, id);
-            throw new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + id);
+    public Exercise addExercise(String username, String workoutId, String exerciseId) {
+        if (!userRepository.existsByEmail(username)) {
+            log.error(USER_NOT_FOUND_ERROR, username);
+            throw new UserNotFoundException(USER_NOT_FOUND + username);
+            
         }
+        User user = userRepository.findByEmail(username).get();
+        Workout workoutExists = user.getWorkouts().stream().filter(workout -> workout.getId().equals(workoutId)).findFirst()
+        .orElseThrow(() -> new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + workoutId));
+
         if (!exerciseRepository.existsById(exerciseId)) {
             log.error("Exercise not found with id: {}", exerciseId);
             throw new ExerciseNotFoundException(EXERCISE_NOT_FOUND_ERROR + exerciseId);
         }
 
-        Exercise exercise = exerciseRepository.findById(exerciseId).get();
-        exercise.getWorkouts().add(workoutRepository.findById(id).get());
-        exerciseRepository.save(exercise);
+        Optional<Exercise> exercise = exerciseRepository.findById(exerciseId);
+        if(!exercise.isPresent()) {
+            log.error("Exercise not found with id: {}", exerciseId);
+            throw new ExerciseNotFoundException(EXERCISE_NOT_FOUND_ERROR + exerciseId);
+        }
+        if(exercise.get().getWorkouts()==null) {
+            exercise.get().setWorkouts(new ArrayList<>());
+        }
+        exercise.get().getWorkouts().add(workoutExists);
+        exerciseRepository.save(exercise.get());
 
-        log.info("Adding exercise to workout with id: {}", id);
-        Workout workout = workoutRepository.findById(id).get();
-        workout.getExercises().add(exercise);
-        workout.setUpdatedAt(LocalDateTime.now());
-        workoutRepository.save(workout);
-        return exercise;
+        log.info("Adding exercise to workout with id: {}", workoutId);
+        if(workoutExists.getExercises()==null) {
+            workoutExists.setExercises(new ArrayList<>());
+        }
+        workoutExists.getExercises().add(exercise.get());
+        workoutExists.setUpdatedAt(LocalDateTime.now());
+        workoutRepository.save(workoutExists);
+        return exercise.get();
     }
 
     @Override

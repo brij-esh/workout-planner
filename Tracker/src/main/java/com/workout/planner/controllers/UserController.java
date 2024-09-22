@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/users")
 @Validated
@@ -50,4 +51,11 @@ public class UserController {
         userService.deleteUser(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PutMapping("/addWorkout/{username}/{workoutId}")
+    public UserResponseDTO addWorkoutToUsersWorkoutList(@PathVariable String username, @PathVariable String workoutId) {
+        return userService.addWorkoutToUsersWorkoutList(username, workoutId);
+
+    }
+    
 }

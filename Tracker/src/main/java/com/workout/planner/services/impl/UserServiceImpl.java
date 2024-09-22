@@ -1,6 +1,7 @@
 package com.workout.planner.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -9,14 +10,17 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import com.workout.planner.dtos.UserRequestDTO;
 import com.workout.planner.dtos.UserResponseDTO;
 import com.workout.planner.exception.UserAlreadyExistsException;
 import com.workout.planner.exception.UserNotFoundException;
+import com.workout.planner.exception.WorkoutNotFoundException;
+import com.workout.planner.models.Exercise;
 import com.workout.planner.models.User;
 import com.workout.planner.models.Workout;
+import com.workout.planner.repositories.ExerciseRepository;
 import com.workout.planner.repositories.UserRepository;
+import com.workout.planner.repositories.WorkoutRepository;
 import com.workout.planner.services.UserService;
 import com.workout.planner.utils.MapperUtils;
 
@@ -30,6 +34,8 @@ public class UserServiceImpl implements UserService{
 
     
     private final UserRepository userRepository;
+    private final WorkoutRepository workoutRepository;
+    private final ExerciseRepository exerciseRepository;
     private static final String USER_NOT_FOUND_ERROR = "User not found with id: ";
     private final ModelMapper modelMapper;
 
@@ -145,5 +151,21 @@ public class UserServiceImpl implements UserService{
         return userRepository.findByUsername(username)
                         .map(user -> modelMapper.map(user, UserResponseDTO.class))
                         .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+    }
+
+    @Override
+    public UserResponseDTO addWorkoutToUsersWorkoutList(String username, String workoutId) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+        Workout workout = workoutRepository.findById(workoutId)
+                .orElseThrow(() -> new WorkoutNotFoundException("Workout not found with id: " + workoutId));
+       
+        user.getWorkouts().add(workout);
+        workout.getParticipants().add(user);
+        workoutRepository.save(workout);
+        user.setUpdatedAt(LocalDateTime.now());
+        user = userRepository.save(user);
+
+        return modelMapper.map(user, UserResponseDTO.class);
     }
 }

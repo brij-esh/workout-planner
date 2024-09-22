@@ -6,8 +6,8 @@ import lombok.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
-import org.apache.commons.lang3.builder.ToStringExclude;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -31,13 +31,14 @@ public class Workout {
 
     @ManyToMany(mappedBy = "workouts", fetch = FetchType.LAZY)
     @JsonIgnore
-    @ToStringExclude
-    private List<User> participants; // Users participating in the workout
+    @ToString.Exclude
+    @Builder.Default
+    private List<User> participants = new ArrayList<>(); // Users participating in the workout
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", referencedColumnName = "id", nullable = false)
     @JsonIgnore
-    @ToStringExclude
+    @ToString.Exclude
     private User creator; // Workout creator
 
     @ManyToMany
@@ -46,7 +47,8 @@ public class Workout {
         joinColumns = @JoinColumn(name = "workout_id"),
         inverseJoinColumns = @JoinColumn(name = "exercise_id")
     )
-    private List<Exercise> exercises;
+    @Builder.Default
+    private List<Exercise> exercises = new ArrayList<>();
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

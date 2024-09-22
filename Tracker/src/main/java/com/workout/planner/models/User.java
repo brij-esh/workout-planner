@@ -6,6 +6,7 @@ import lombok.*;
 import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.lang3.builder.ToStringExclude;
 
@@ -42,13 +43,16 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "workout_id")
     )
     @ToStringExclude
-    private List<Workout> workouts;
+    @Builder.Default
+    private List<Workout> workouts = new ArrayList<>();
 
     @OneToMany(mappedBy = "creator", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<Workout> createdWorkouts;
+    @Builder.Default
+    private List<Workout> createdWorkouts = new ArrayList<>();
 
     @OneToMany(mappedBy = "creator", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<Exercise> createdExercises;
+    @Builder.Default
+    private List<Exercise> createdExercises = new ArrayList<>();
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

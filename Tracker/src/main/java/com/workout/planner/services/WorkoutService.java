@@ -13,7 +13,7 @@ public interface WorkoutService {
     public Workout updateWorkout(String userEmail, String workoutId, WorkoutRequestDTO workoutRequestDTO);
     public void deleteWorkout(String userEmail, String workoutId);
     public List<Exercise> getExercises(String workoutId);
-    public Exercise addExercise(String workoutId, String exerciseId);
+    public Exercise addExercise(String username, String workoutId, String exerciseId);
     public Exercise getExercise(String workoutId, String exerciseId);
     public Exercise updateExercise(String workoutId, String exerciseId, Exercise exercise);
     public void deleteExercise(String workoutId, String exerciseId);

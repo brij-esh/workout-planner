@@ -11,4 +11,5 @@ public interface UserService {
     UserResponseDTO updateUser(String id, UserRequestDTO user);
     void deleteUser(String id);
     UserResponseDTO getUserByUsername(String username);
+    UserResponseDTO addWorkoutToUsersWorkoutList(String username, String workoutId);
 }

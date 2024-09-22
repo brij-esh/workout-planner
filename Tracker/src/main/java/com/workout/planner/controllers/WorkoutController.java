@@ -63,9 +63,9 @@ public class WorkoutController {
         return new ResponseEntity<>(exercises, HttpStatus.OK);
     }
 
-    @PostMapping("/add-exercise/{workoutId}/exercises/{exerciseId}")
-    public ResponseEntity<Exercise> addExercise(@PathVariable String workoutId, @PathVariable String exerciseId) {
-        Exercise addedExercise = workoutService.addExercise(workoutId, exerciseId);
+    @PostMapping("/add-exercise/{username}/{workoutId}/{exerciseId}")
+    public ResponseEntity<Exercise> addExercise(@PathVariable String username, @PathVariable String workoutId, @PathVariable String exerciseId) {
+        Exercise addedExercise = workoutService.addExercise(username, workoutId, exerciseId);
         return new ResponseEntity<>(addedExercise, HttpStatus.CREATED);
     }
 

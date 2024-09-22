@@ -6,6 +6,7 @@ import lombok.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.lang3.builder.ToStringExclude;
 
@@ -36,12 +37,13 @@ public class Exercise {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", referencedColumnName = "id", nullable = false)
     @JsonIgnore
-     @ToStringExclude
+    @ToStringExclude
     private User creator; // Exercise creator
 
     @ManyToMany(mappedBy = "exercises", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<Workout> workouts;
+    @Builder.Default
+    private List<Workout> workouts = new ArrayList<>();
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
