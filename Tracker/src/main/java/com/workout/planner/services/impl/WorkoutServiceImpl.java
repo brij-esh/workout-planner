@@ -45,11 +45,11 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Transactional
     @Override
-    public Workout createWorkout(String userEmail, WorkoutRequestDTO workoutRequestDTO) {
-        User user = userRepository.findByEmail(userEmail)
+    public Workout createWorkout(String username, WorkoutRequestDTO workoutRequestDTO) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
-                    log.error(USER_NOT_FOUND_ERROR, userEmail);
-                    return new UserNotFoundException(USER_NOT_FOUND + userEmail);
+                    log.error(USER_NOT_FOUND_ERROR, username);
+                    return new UserNotFoundException(USER_NOT_FOUND + username);
                 });
 
         if (workoutRepository.findByName(workoutRequestDTO.getName()) != null) {
@@ -94,19 +94,19 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public Workout updateWorkout(String userEmail, String id, WorkoutRequestDTO workoutRequestDTO) {
-        Optional<User> user = userRepository.findByEmail(userEmail);
+    public Workout updateWorkout(String username, String id, WorkoutRequestDTO workoutRequestDTO) {
+        Optional<User> user = userRepository.findByUsername(username);
         if (!user.isPresent()) {
-            log.error(USER_NOT_FOUND_ERROR, userEmail);
-            throw new UserNotFoundException(USER_NOT_FOUND + userEmail);
+            log.error(USER_NOT_FOUND_ERROR, username);
+            throw new UserNotFoundException(USER_NOT_FOUND + username);
         }
         log.info("Updating workout with id: {}", id);
         Workout existingWorkout = workoutRepository.findById(id)
                 .orElseThrow(() -> new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + id));
-        if (!existingWorkout.getCreator().getEmail().equals(userEmail)) {
-            log.error("User with email {} is not authorized to update workout with id: {}", userEmail, id);
+        if (!existingWorkout.getCreator().getUsername().equals(username)) {
+            log.error("User with email {} is not authorized to update workout with id: {}", username, id);
             throw new RequestProcessingException(
-                    "User with email " + userEmail + " is not authorized to update workout with id: " + id);
+                    "User with username " + username + " is not authorized to update workout with id: " + id);
         }
 
         if (workoutRequestDTO.getName() != null) {
@@ -126,31 +126,31 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public void deleteWorkout(String userEmail, String id) {
-        Optional<User> user = userRepository.findByEmail(userEmail);
+    public void deleteWorkout(String username, String workoutId) {
+        Optional<User> user = userRepository.findByUsername(username);
         if (!user.isPresent()) {
-            log.error(USER_NOT_FOUND_ERROR, userEmail);
-            throw new UserNotFoundException(USER_NOT_FOUND + userEmail);
+            log.error(USER_NOT_FOUND_ERROR, username);
+            throw new UserNotFoundException(USER_NOT_FOUND + username);
         }
-        log.info("Deleting workout with id: {}", id);
-        Workout existingWorkout = workoutRepository.findById(id)
-                .orElseThrow(() -> new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + id));
-        if (!existingWorkout.getCreator().getEmail().equals(userEmail)) {
-            log.error("User with email {} is not authorized to delete workout with id: {}", userEmail, id);
+        log.info("Deleting workout with id: {}", workoutId);
+        Workout existingWorkout = workoutRepository.findById(workoutId)
+                .orElseThrow(() -> new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + workoutId));
+        if (!existingWorkout.getCreator().getUsername().equals(username)) {
+            log.error("User with username {} is not authorized to delete workout with id: {}",username, workoutId);
             throw new RequestProcessingException(
-                    "User with email " + userEmail + " is not authorized to delete workout with id: " + id);
+                    "User with username " + username + " is not authorized to delete workout with id: " + workoutId);
         }
         workoutRepository.delete(existingWorkout);
     }
 
     @Override
-    public List<Exercise> getExercises(String id) {
-        if (!workoutRepository.existsById(id)) {
-            log.error("{}{}", WORKOUT_NOT_FOUND_ERROR, id);
-            throw new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + id);
+    public List<Exercise> getExercises(String workoutId) {
+        if (!workoutRepository.existsById(workoutId)) {
+            log.error("{}{}", WORKOUT_NOT_FOUND_ERROR, workoutId);
+            throw new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + workoutId);
         }
-        log.info("Fetching exercises for workout with id: {}", id);
-        Workout workout = workoutRepository.findById(id).get();
+        log.info("Fetching exercises for workout with id: {}", workoutId);
+        Workout workout = workoutRepository.findById(workoutId).get();
         return workout.getExercises();
     }
 
@@ -166,7 +166,7 @@ public class WorkoutServiceImpl implements WorkoutService {
         .orElseThrow(() -> new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + workoutId));
 
         if (!exerciseRepository.existsById(exerciseId)) {
-            log.error("Exercise not found with id: {}", exerciseId);
+            log.error(EXERCISE_NOT_FOUND_ERROR, exerciseId);
             throw new ExerciseNotFoundException(EXERCISE_NOT_FOUND_ERROR + exerciseId);
         }
 
@@ -192,27 +192,32 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public Exercise getExercise(String id, String exerciseId) {
-        if (!workoutRepository.existsById(id)) {
-            log.error("{} {}", WORKOUT_NOT_FOUND_ERROR, id);
-            throw new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + id);
+    public Exercise getExercise(String username, String workoutId, String exerciseId) {
+
+        if (!userRepository.existsByEmail(username)) {
+            log.error(USER_NOT_FOUND_ERROR, username);
+            throw new UserNotFoundException(USER_NOT_FOUND + username);
         }
-        log.info("Fetching exercise with id: {} for workout with id: {}", exerciseId, id);
-        Workout workout = workoutRepository.findById(id).get();
-        return workout.getExercises().stream()
-                .filter(exercise -> exercise.getId().equals(exerciseId))
-                .findFirst()
-                .orElseThrow(() -> new ExerciseNotFoundException(EXERCISE_NOT_FOUND_ERROR + exerciseId));
+        User user = userRepository.findByEmail(username).get();
+        Workout workout = user.getWorkouts().stream().filter(w -> w.getId().equals(workoutId)).findFirst()
+                .orElseThrow(() -> new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + workoutId));
+        Exercise exercise = workout.getExercises().stream().filter(e -> e.getId().equals(exerciseId)).findFirst().get();
+        if (exercise == null) {
+            log.error("Exercise not found with id: {}", exerciseId);
+            throw new ExerciseNotFoundException(EXERCISE_NOT_FOUND_ERROR + exerciseId);
+        }
+        log.info("Fetching exercise with id: {} for workout with id: {}", exerciseId, workoutId);
+        return exercise;
     }
 
     @Override
-    public Exercise updateExercise(String id, String exerciseId, Exercise exercise) {
-        if (!workoutRepository.existsById(id)) {
-            log.error("Workout not found with id: {}", id);
-            throw new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + id);
+    public Exercise updateExercise(String username, String workoutId, String exerciseId, Exercise exercise) {
+        if (!workoutRepository.existsById(workoutId)) {
+            log.error("Workout not found with id: {}", workoutId);
+            throw new WorkoutNotFoundException(WORKOUT_NOT_FOUND_ERROR + workoutId);
         }
-        log.info("Updating exercise with id: {} for workout with id: {}", exerciseId, id);
-        Workout workout = workoutRepository.findById(id).get();
+        log.info("Updating exercise with id: {} for workout with id: {}", exerciseId, workoutId);
+        Workout workout = workoutRepository.findById(workoutId).get();
         Exercise existingExercise = workout.getExercises().stream()
                 .filter(e -> e.getId().equals(exerciseId))
                 .findFirst()

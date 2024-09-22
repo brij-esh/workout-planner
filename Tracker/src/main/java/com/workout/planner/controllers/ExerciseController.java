@@ -28,34 +28,34 @@ public class ExerciseController {
 
     private final ExerciseService exerciseService;
 
-    @PostMapping("/{userEmail}")
-    public ResponseEntity<Exercise> createExercise(@PathVariable String userEmail, @RequestBody ExerciseRequestDTO exercise) {
-        Exercise createdExercise = exerciseService.createExercise(userEmail, exercise);
+    @PostMapping("/{username}")
+    public ResponseEntity<Exercise> createExercise(@PathVariable String username, @RequestBody ExerciseRequestDTO exercise) {
+        Exercise createdExercise = exerciseService.createExercise(username, exercise);
         return new ResponseEntity<>(createdExercise, HttpStatus.CREATED);
     }
 
 
-    @PostMapping("/update-exercise/{userEmail}/{exerciseId}")
-    public ResponseEntity<Exercise> updateExercise(@PathVariable String userEmail, @PathVariable String exerciseId, @RequestBody ExerciseRequestDTO exercise) {
-        Exercise updatedExercise = exerciseService.updateExercise(userEmail, exerciseId, exercise);
+    @PostMapping("/update-exercise/{username}/{exerciseId}")
+    public ResponseEntity<Exercise> updateExercise(@PathVariable String username, @PathVariable String exerciseId, @RequestBody ExerciseRequestDTO exercise) {
+        Exercise updatedExercise = exerciseService.updateExercise(username, exerciseId, exercise);
         return new ResponseEntity<>(updatedExercise, HttpStatus.OK);
     }
 
-    @PostMapping("/delete-exercise/{userEmail}/{exerciseId}")
-    public ResponseEntity<Void> deleteExercise(@PathVariable String userEmail, @PathVariable String exerciseId) {
-        exerciseService.deleteExercise(userEmail, exerciseId);
+    @PostMapping("/delete-exercise/{username}/{exerciseId}")
+    public ResponseEntity<Void> deleteExercise(@PathVariable String username, @PathVariable String exerciseId) {
+        exerciseService.deleteExercise(username, exerciseId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/get-exercise/{exerciseId}")
-    public ResponseEntity<Exercise> getExercise(@PathVariable String exerciseId) {
-        Exercise exercise = exerciseService.getExercise(exerciseId);
+    @PostMapping("/get-exercise/{username}/{exerciseId}")
+    public ResponseEntity<Exercise> getExercise(@PathVariable String username, @PathVariable String exerciseId) {
+        Exercise exercise = exerciseService.getExercise(username, exerciseId);
         return new ResponseEntity<>(exercise, HttpStatus.OK);
     }
 
-    @PostMapping("/get-all-exercises")
-    public ResponseEntity<List<Exercise>> getAllExercises() {
-        List<Exercise> exercises = exerciseService.getAllExercises();
+    @PostMapping("/get-all-exercises/{username}")
+    public ResponseEntity<List<Exercise>> getAllExercises(@PathVariable String username) {
+        List<Exercise> exercises = exerciseService.getAllExercises(username);
         return new ResponseEntity<>(exercises, HttpStatus.OK);
     }
 

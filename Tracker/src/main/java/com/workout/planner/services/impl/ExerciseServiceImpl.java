@@ -26,15 +26,15 @@ public class ExerciseServiceImpl implements ExerciseService{
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private static final String EXERCISE_NOT_FOUND_ERROR = "Exercise not found with id: ";
-    private static final String USER_NOT_FOUND_ERROR = "User not found with email: ";
+    private static final String USER_NOT_FOUND_ERROR = "User not found with username: ";
 
     @Override
-    public Exercise createExercise(String userEmail, ExerciseRequestDTO exerciseRequestDTO) {
-        if(!userRepository.existsByEmail(userEmail)) {
-            log.error(USER_NOT_FOUND_ERROR, userEmail);
-            throw new UserNotFoundException(USER_NOT_FOUND_ERROR + userEmail);
+    public Exercise createExercise(String username, ExerciseRequestDTO exerciseRequestDTO) {
+        if(!userRepository.existsByEmail(username)) {
+            log.error(USER_NOT_FOUND_ERROR, username);
+            throw new UserNotFoundException(USER_NOT_FOUND_ERROR + username);
         }
-        User user = userRepository.findByEmail(userEmail).get();
+        User user = userRepository.findByUsername(username).get();
         Exercise exercise = modelMapper.map(exerciseRequestDTO, Exercise.class);
         exercise.setCreator(user);
         exercise.setCreatedAt(LocalDateTime.now());
@@ -47,19 +47,19 @@ public class ExerciseServiceImpl implements ExerciseService{
     }
 
     @Override
-    public Exercise updateExercise(String userEmail, String exerciseId,  ExerciseRequestDTO exerciseRequestDTO) {
-        if(!userRepository.existsByEmail(userEmail)) {
-            log.error(USER_NOT_FOUND_ERROR, userEmail);
-            throw new UserNotFoundException(USER_NOT_FOUND_ERROR + userEmail);
+    public Exercise updateExercise(String username, String exerciseId,  ExerciseRequestDTO exerciseRequestDTO) {
+        if(!userRepository.existsByUsername(username)) {
+            log.error(USER_NOT_FOUND_ERROR, username);
+            throw new UserNotFoundException(USER_NOT_FOUND_ERROR + username);
         }
         if(!exerciseRepository.existsById(exerciseId)) {
             log.error(EXERCISE_NOT_FOUND_ERROR, exerciseId);
             throw new UserNotFoundException(EXERCISE_NOT_FOUND_ERROR + exerciseId);
         }
         Exercise exercise = exerciseRepository.findById(exerciseId).get();
-        if(!exercise.getCreator().getEmail().equals(userEmail)) {
-            log.error("User with email: {} is not the creator of the exercise with id: {}", userEmail, exerciseId);
-            throw new UserNotFoundException("User with email: " + userEmail + " is not the creator of the exercise with id: " + exerciseId);
+        if(!exercise.getCreator().getUsername().equals(username)) {
+            log.error("User with username: {} is not the creator of the exercise with id: {}", username, exerciseId);
+            throw new UserNotFoundException("User with username: " + username + " is not the creator of the exercise with id: " + exerciseId);
         }
         if(exerciseRequestDTO.getName() != null) {
             exercise.setName(exerciseRequestDTO.getName());
@@ -90,25 +90,25 @@ public class ExerciseServiceImpl implements ExerciseService{
     }
 
     @Override
-    public void deleteExercise(String userEmail, String exerciseId) {
-        if(!userRepository.existsByEmail(userEmail)) {
-            log.error(USER_NOT_FOUND_ERROR, userEmail);
-            throw new UserNotFoundException(USER_NOT_FOUND_ERROR + userEmail);
+    public void deleteExercise(String username, String exerciseId) {
+        if(!userRepository.existsByUsername(username)) {
+            log.error(USER_NOT_FOUND_ERROR, username);
+            throw new UserNotFoundException(USER_NOT_FOUND_ERROR + username);
         }
         if(!exerciseRepository.existsById(exerciseId)) {
             log.error(EXERCISE_NOT_FOUND_ERROR, exerciseId);
             throw new UserNotFoundException(EXERCISE_NOT_FOUND_ERROR + exerciseId);
         }
         Exercise exercise = exerciseRepository.findById(exerciseId).get();
-        if(!exercise.getCreator().getEmail().equals(userEmail)) {
-            log.error("User with email: {} is not the creator of the exercise with id: {}", userEmail, exerciseId);
-            throw new UserNotFoundException("User with email: " + userEmail + " is not the creator of the exercise with id: " + exerciseId);
+        if(!exercise.getCreator().getUsername().equals(username)) {
+            log.error("User with username: {} is not the creator of the exercise with id: {}", username, exerciseId);
+            throw new UserNotFoundException("User with username: " + username + " is not the creator of the exercise with id: " + exerciseId);
         }
         exerciseRepository.deleteById(exerciseId);
     }
 
     @Override
-    public Exercise getExercise(String exerciseId) {
+    public Exercise getExercise(String username, String exerciseId) {
         if(!exerciseRepository.existsById(exerciseId)) {
             log.error(EXERCISE_NOT_FOUND_ERROR, exerciseId);
             throw new UserNotFoundException(EXERCISE_NOT_FOUND_ERROR + exerciseId);
@@ -117,8 +117,14 @@ public class ExerciseServiceImpl implements ExerciseService{
     }
 
     @Override
-    public List<Exercise> getAllExercises() {
-        return exerciseRepository.findAll();
+    public List<Exercise> getAllExercises(String username) {
+        if (!userRepository.existsByUsername(username)) {
+            log.error(USER_NOT_FOUND_ERROR, username);
+            throw new UserNotFoundException(USER_NOT_FOUND_ERROR + username);
+            
+        }
+        User user = userRepository.findByUsername(username).get();
+        return exerciseRepository.findByCreatorId(user.getId());
     }
 
 }

@@ -55,7 +55,6 @@ public class UserController {
     @PutMapping("/addWorkout/{username}/{workoutId}")
     public UserResponseDTO addWorkoutToUsersWorkoutList(@PathVariable String username, @PathVariable String workoutId) {
         return userService.addWorkoutToUsersWorkoutList(username, workoutId);
-
     }
     
 }

@@ -39,25 +39,25 @@ public class WorkoutController {
         return new ResponseEntity<>(workoutService.getWorkout(workoutId), HttpStatus.OK);
     }
 
-    @PostMapping("/{userEmail}")
-    public ResponseEntity<Workout> createWorkout(@PathVariable String userEmail, @RequestBody WorkoutRequestDTO workout) {
-        Workout createdWorkout = workoutService.createWorkout(userEmail, workout);
+    @PostMapping("/create/{username}")
+    public ResponseEntity<Workout> createWorkout(@PathVariable String username, @RequestBody WorkoutRequestDTO workout) {
+        Workout createdWorkout = workoutService.createWorkout(username, workout);
         return new ResponseEntity<>(createdWorkout, HttpStatus.CREATED);
     }
 
-    @PutMapping("/update-workout/{userEmail}/{workoutId}")
-    public ResponseEntity<Workout> updateWorkout(@PathVariable String userEmail, @PathVariable String workoutId, @RequestBody WorkoutRequestDTO workout) {
-        Workout updatedWorkout = workoutService.updateWorkout(userEmail, workoutId, workout);
+    @PutMapping("/update/{username}/{workoutId}")
+    public ResponseEntity<Workout> updateWorkout(@PathVariable String username, @PathVariable String workoutId, @RequestBody WorkoutRequestDTO workout) {
+        Workout updatedWorkout = workoutService.updateWorkout(username, workoutId, workout);
         return new ResponseEntity<>(updatedWorkout, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete-workout/{userEmail}/{workoutId}")
+    @DeleteMapping("/delete/{userEmail}/{workoutId}")
     public ResponseEntity<Void> deleteWorkout(@PathVariable String userEmail, @PathVariable String workoutId) {
         workoutService.deleteWorkout(userEmail, workoutId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/get-workout-exercises/{workoutId}/exercises")
+    @GetMapping("/get-exercises/{workoutId}/exercises")
     public ResponseEntity<List<Exercise>> getExercises(@PathVariable String workoutId) {
         List<Exercise> exercises = workoutService.getExercises(workoutId);
         return new ResponseEntity<>(exercises, HttpStatus.OK);
@@ -69,15 +69,15 @@ public class WorkoutController {
         return new ResponseEntity<>(addedExercise, HttpStatus.CREATED);
     }
 
-    @GetMapping("/get-workout-exercise/{workoutId}/exercises/{exerciseId}")
-    public ResponseEntity<Exercise> getExercise(@PathVariable String workoutId, @PathVariable String exerciseId) {
-        Exercise exercise = workoutService.getExercise(workoutId, exerciseId);
+    @GetMapping("/get-exercise/{username}/{workoutId}/exercises/{exerciseId}")
+    public ResponseEntity<Exercise> getExercise(@PathVariable String username, @PathVariable String workoutId, @PathVariable String exerciseId) {
+        Exercise exercise = workoutService.getExercise(username, workoutId, exerciseId);
         return new ResponseEntity<>(exercise, HttpStatus.OK);
     }
 
     @PutMapping("/{workoutId}/exercises/{exerciseId}")
-    public ResponseEntity<Exercise> updateExercise(@PathVariable String workoutId, @PathVariable String exerciseId, @RequestBody Exercise exercise) {
-        Exercise updatedExercise = workoutService.updateExercise(workoutId, exerciseId, exercise);
+    public ResponseEntity<Exercise> updateExercise(@PathVariable String userName, @PathVariable String workoutId, @PathVariable String exerciseId, @RequestBody Exercise exercise) {
+        Exercise updatedExercise = workoutService.updateExercise(userName, workoutId, exerciseId, exercise);
         return new ResponseEntity<>(updatedExercise, HttpStatus.OK);
     }
 
